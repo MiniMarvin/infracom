@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Client for file transference
+"""
+
 
 import socket
 import argparse
@@ -6,72 +10,80 @@ import subprocess
 import os
 
 
-def getFile():
-	sentence = args.file
-	outfile = args.output
-	clientSocket.send("GET||".encode() + sentence.encode())
-	
-	with open(outfile, "wb") as f:
-		data = clientSocket.recv(1024)
-		while data:
-			f.write(data)
-			data = clientSocket.recv(1024)
-	
-	clientSocket.close()
-	pass
+def get_file():
+    """
+    Get a file from the server
+    """
+    sentence = ARGS.file
+    outfile = ARGS.output
+    CLIENT_SOCKET.send("GET||".encode() + sentence.encode())
 
-def getProgFile():
-	getFile()
-	## Executa
-	file = args.output
-	os.system("chmod +x " + file)
-	subprocess.call([file])
-	
+    with open(outfile, "wb") as file:
+        data = CLIENT_SOCKET.recv(1024)
+        while data:
+            file.write(data)
+            data = CLIENT_SOCKET.recv(1024)
 
-def sendFile():
-	data = args.data
-	filename = args.file
-	outstream = "POST||" + filename + "||" + data
-	clientSocket.send(outstream.encode())
-	pass
-	
+    CLIENT_SOCKET.close()
 
-serverName = "localhost"
-serverPort = 2080
+def get_prog_file():
+    """
+    Get a binary file from the server and runs it automatically
+    """
+    get_file()
+    ## Executa
+    file = ARGS.output
+    os.system("chmod +x " + file)
+    subprocess.call([file])
 
-clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--command", "-c", type=str,
-					help="GET file filename | to get a file from the server")
-parser.add_argument('--file', '-f', type=str,
-					help='File to get from server')
-parser.add_argument('--output', '-o', type=str,
-					help='Output file name for get')
-parser.add_argument('--data', '-d', type=str,
-					help='Output file data for post')
-args = parser.parse_args()
+def send_file():
+    """
+    Send a file to the server
+    """
+    data = ARGS.data
+    filename = ARGS.file
+    outstream = "POST||" + filename + "||" + data
+    CLIENT_SOCKET.send(outstream.encode())
+
+
+SERVER_NAME = "localhost"
+SERVER_PORT = 2080
+
+CLIENT_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("--command", "-c", type=str,
+                    help="GET file filename | to get a file from the server")
+PARSER.add_argument('--file', '-f', type=str,
+                    help='File to get from server')
+PARSER.add_argument('--output', '-o', type=str,
+                    help='Output file name for get')
+PARSER.add_argument('--data', '-d', type=str,
+                    help='Output file data for post')
+ARGS = PARSER.parse_args()
 
 try:
-	clientSocket.connect((serverName,serverPort))
+    CLIENT_SOCKET.connect((SERVER_NAME, SERVER_PORT))
 except Exception:
-	pass
+    pass
 
 try:
-	if args.command == "GET":
-		getFile()
-	
-	elif args.command == "GETPROG":
-		getProgFile()
-		
-	elif args.command == "POST":
-		sendFile()
+    if ARGS.command == "GET":
+        get_file()
+
+    elif ARGS.command == "GETPROG":
+        get_prog_file()
+
+    elif ARGS.command == "POST":
+        send_file()
 
 except KeyboardInterrupt:
-	escape = True
+    # escape = True
+    pass
 except Exception:
-	clientSocket.close()
+    CLIENT_SOCKET.close()
 
 
-clientSocket.close()
+CLIENT_SOCKET.close()
 print("\nBye bye :)")
