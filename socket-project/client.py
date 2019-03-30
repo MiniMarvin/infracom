@@ -69,13 +69,13 @@ except Exception:
     pass
 
 try:
-    if ARGS.command == "GET":
+    if ARGS.command.upper() == "GET":
         get_file()
 
-    elif ARGS.command == "GETPROG":
+    elif ARGS.command.upper() == "GETPROG":
         get_prog_file()
 
-    elif ARGS.command == "POST":
+    elif ARGS.command.upper() == "POST":
         send_file()
 
 except KeyboardInterrupt:
